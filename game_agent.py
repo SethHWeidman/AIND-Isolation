@@ -166,9 +166,8 @@ class MinimaxPlayer(IsolationPlayer):
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        best_move = (-1, -1)
-
-        print("Legal moves for player: ", game.get_legal_moves())
+        if len(game.get_legal_moves()) == 0:
+            return (-1, -1)
 
         try:
             # The try/except block will automatically catch the exception

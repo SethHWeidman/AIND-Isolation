@@ -256,14 +256,14 @@ if __name__ == "__main__":
     from isolation import Board
 
     # create an isolation board (by default 7x7)
-    player1 = MinimaxPlayer()
-    player2 = RandomPlayer()
+    player1 = GreedyPlayer()
+    player2 = MinimaxPlayer()
     game = Board(player1, player2)
 
     # place player 1 on the board at row 2, column 3, then place player 2 on
     # the board at row 0, column 5; display the resulting board state.  Note
     # that the .apply_move() method changes the calling object in-place.
-    game.apply_move((2, 3))
+    game.apply_move((0, 1))
     game.apply_move((0, 5))
     print(game.to_string())
 
@@ -271,7 +271,7 @@ if __name__ == "__main__":
     assert(player1 == game.active_player)
 
     # get a list of the legal moves available to the active player
-    print("The legal moves for the current player at this point are:", game.get_legal_moves())
+    # print("The legal moves for the current player at this point are:", game.get_legal_moves())
 
     # Get all the payoffs of each move for that player
     # print("The payoffs for Player 1 at this point are:", player1.get_move(game, 0.0))
