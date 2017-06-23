@@ -36,7 +36,15 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - opp_moves)
 
 
 def custom_score_2(game, player):
@@ -216,17 +224,79 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
+        active_player = game._active_player
+        def _max_value(game, depth):
+            # print("Check max value")
+            if game.is_winner(game._active_player) or game.is_loser(game._active_player):
+                return game.utility(active_player)
+
+            # Get all moves available at current position
+            available_moves = game.get_legal_moves()
+
+            # Get all the games that result from these moves
+            resulting_games = [game.forecast_move(move) for move in available_moves]
+
+            # If depth is 0, just return the score for that cell:
+            if depth == 0:
+                return custom_score(game, game._active_player)
+
+            # For each resulting game, simulate all the moves and get the min value
+            resulting_game_values = [_min_value(game, depth-1) for game in resulting_games]
+
+            # Find the index of the best move
+            best_move_index = np.argmax(resulting_game_values)
+
+            # Find the best move
+            best_move = available_moves[best_move_index]
+
+            # Find the value of that move
+            best_move_value = resulting_game_values[best_move_index]
+
+            return best_move_value
+
+        def _min_value(game, depth):
+            # print("Check min value")
+            if game.is_winner(game._active_player) or game.is_loser(game._active_player):
+                return game.utility(active_player)
+
+            # Get all moves available at current position
+            available_moves = game.get_legal_moves()
+
+            # Get all the games that result from these moves
+            resulting_games = [game.forecast_move(move) for move in available_moves]
+
+            # If depth is 0, just return the score for that player:
+            if depth == 0:
+                return custom_score(game, game._active_player)
+
+            # For each resulting game, simulate all the moves and get the min value
+            resulting_game_values = [_max_value(game, depth-1) for game in resulting_games]
+
+            # Find the index of the best move
+            best_move_index = np.argmin(resulting_game_values)
+
+            # Find the value of that move
+            best_move_value = resulting_game_values[best_move_index]
+
+            return best_move_value
+
+        if game.is_loser(game._active_player):
+            best_move = (-1, -1)
 
         # Get all moves available at current position
         available_moves = game.get_legal_moves()
 
-        # For each available move, get the "payoff" associated with that move
-        utilities_moves = [game.utility(x) for x in available_moves]
+        # Get all the games that result from these moves
+        resulting_games = [game.forecast_move(move) for move in available_moves]
 
-        try: # Try to get the best move:
-            best_move = available_moves[np.argmax(utilities_moves)]
-        except: # If none available, choose the first move
-            best_move = available_moves[0]
+        # For each resulting game, simulate all the moves and get the min value
+        resulting_game_values = [_min_value(game, depth) for game in resulting_games]
+
+        # Find the index of the best move
+        best_move_index = np.argmax(resulting_game_values)
+
+        # Get the best move
+        best_move = available_moves[best_move_index]
 
         return best_move
 
