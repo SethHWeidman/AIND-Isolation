@@ -4,6 +4,7 @@ and include the results in your report.
 """
 import random
 random.seed(1)
+import numpy as np
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -219,10 +220,15 @@ class MinimaxPlayer(IsolationPlayer):
         # Get all moves available at current position
         available_moves = game.get_legal_moves()
 
-        random_move = random.choice(available_moves)
+        # For each available move, get the "payoff" associated with that move
+        utilities_moves = [game.utility(x) for x in available_moves]
 
-        # Choose a random move
-        return random_move
+        try: # Try to get the best move:
+            best_move = available_moves[np.argmax(utilities_moves)]
+        except: # If none available, choose the first move
+            best_move = available_moves[0]
+
+        return best_move
 
 
 class AlphaBetaPlayer(IsolationPlayer):
