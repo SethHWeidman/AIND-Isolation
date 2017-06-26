@@ -172,7 +172,6 @@ class MinimaxPlayer(IsolationPlayer):
         if len(legal_moves) == 0:
             return (-1, -1)
 
-        print(legal_moves)
         best_move = legal_moves[random.randint(0, len(legal_moves) - 1)]
 
 
