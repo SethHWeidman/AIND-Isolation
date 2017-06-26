@@ -164,15 +164,22 @@ class MinimaxPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
+        # Initialize `best_move` to be a random move:
+        legal_moves = game.get_legal_moves()
+
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        if len(game.get_legal_moves()) == 0:
+        if len(legal_moves) == 0:
             return (-1, -1)
+
+        print(legal_moves)
+        best_move = legal_moves[random.randint(0, len(legal_moves) - 1)]
+
 
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            return self.minimax(game, self.search_depth)
+            best_move = self.minimax(game, self.search_depth)
 
         except SearchTimeout:
             pass  # Handle any actions required after timeout as needed
@@ -225,7 +232,9 @@ class MinimaxPlayer(IsolationPlayer):
         # TODO: finish this function!
         active_player = game._active_player
         def _max_value(game, depth):
-            # print("Check max value")
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
             if game.is_winner(game._active_player) or game.is_loser(game._active_player):
                 return game.utility(active_player)
 
@@ -237,11 +246,10 @@ class MinimaxPlayer(IsolationPlayer):
 
             # If depth is 0, just return the score for that cell:
             if depth == 0:
-                return custom_score(game, game._active_player)
+                return self.score(game, game._active_player)
 
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_min_value(game, depth-1) for game in resulting_games]
-
             # Find the index of the best move
             best_move_index = np.argmax(resulting_game_values)
 
@@ -254,7 +262,9 @@ class MinimaxPlayer(IsolationPlayer):
             return best_move_value
 
         def _min_value(game, depth):
-            # print("Check min value")
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
             if game.is_winner(game._active_player) or game.is_loser(game._active_player):
                 return game.utility(active_player)
 
@@ -266,7 +276,7 @@ class MinimaxPlayer(IsolationPlayer):
 
             # If depth is 0, just return the score for that player:
             if depth == 0:
-                return custom_score(game, game._active_player)
+                return self.score(game, game._active_player)
 
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_max_value(game, depth-1) for game in resulting_games]
@@ -289,7 +299,7 @@ class MinimaxPlayer(IsolationPlayer):
         resulting_games = [game.forecast_move(move) for move in available_moves]
 
         # For each resulting game, simulate all the moves and get the min value
-        resulting_game_values = [_min_value(game, depth) for game in resulting_games]
+        resulting_game_values = [_min_value(game, depth-1) for game in resulting_games]
 
         # Find the index of the best move
         best_move_index = np.argmax(resulting_game_values)
