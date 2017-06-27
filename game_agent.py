@@ -234,7 +234,7 @@ class MinimaxPlayer(IsolationPlayer):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
 
-            if game.is_winner(game._active_player) or game.is_loser(game._active_player):
+            if game.is_winner(self) or game.is_loser(self):
                 return game.utility(active_player)
 
             # Get all moves available at current position
@@ -245,7 +245,7 @@ class MinimaxPlayer(IsolationPlayer):
 
             # If depth is 0, just return the score for that cell:
             if depth == 0:
-                return self.score(game, game._active_player)
+                return self.score(game, self)
 
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_min_value(game, depth-1) for game in resulting_games]
@@ -264,7 +264,7 @@ class MinimaxPlayer(IsolationPlayer):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
 
-            if game.is_winner(game._active_player) or game.is_loser(game._active_player):
+            if game.is_winner(self) or game.is_loser(self):
                 return game.utility(active_player)
 
             # Get all moves available at current position
@@ -275,7 +275,7 @@ class MinimaxPlayer(IsolationPlayer):
 
             # If depth is 0, just return the score for that player:
             if depth == 0:
-                return self.score(game, game._active_player)
+                return self.score(game, self)
 
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_max_value(game, depth-1) for game in resulting_games]
