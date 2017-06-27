@@ -245,15 +245,13 @@ class MinimaxPlayer(IsolationPlayer):
 
             # If depth is 0, just return the score for that cell:
             if depth == 0:
-                return self.score(game, self)
+                return self.score(game, active_player)
 
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_min_value(game, depth-1) for game in resulting_games]
+
             # Find the index of the best move
             best_move_index = np.argmax(resulting_game_values)
-
-            # Find the best move
-            best_move = available_moves[best_move_index]
 
             # Find the value of that move
             best_move_value = resulting_game_values[best_move_index]
@@ -275,7 +273,7 @@ class MinimaxPlayer(IsolationPlayer):
 
             # If depth is 0, just return the score for that player:
             if depth == 0:
-                return self.score(game, self)
+                return self.score(game, active_player)
 
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_max_value(game, depth-1) for game in resulting_games]
@@ -288,7 +286,7 @@ class MinimaxPlayer(IsolationPlayer):
 
             return best_move_value
 
-        if game.is_loser(game._active_player):
+        if game.is_loser(self):
             best_move = (-1, -1)
 
         # Get all moves available at current position
