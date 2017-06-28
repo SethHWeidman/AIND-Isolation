@@ -237,15 +237,15 @@ class MinimaxPlayer(IsolationPlayer):
             if game.is_winner(self) or game.is_loser(self):
                 return game.utility(active_player)
 
+            # If depth is 0, just return the score for that cell:
+            if depth == 0:
+                return self.score(game, active_player)
+
             # Get all moves available at current position
             available_moves = game.get_legal_moves()
 
             # Get all the games that result from these moves
             resulting_games = [game.forecast_move(move) for move in available_moves]
-
-            # If depth is 0, just return the score for that cell:
-            if depth == 0:
-                return self.score(game, active_player)
 
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_min_value(game, depth-1) for game in resulting_games]
@@ -265,15 +265,17 @@ class MinimaxPlayer(IsolationPlayer):
             if game.is_winner(self) or game.is_loser(self):
                 return game.utility(active_player)
 
+            # If depth is 0, just return the score for that player:
+            if depth == 0:
+                return self.score(game, active_player)
+
             # Get all moves available at current position
             available_moves = game.get_legal_moves()
 
             # Get all the games that result from these moves
             resulting_games = [game.forecast_move(move) for move in available_moves]
 
-            # If depth is 0, just return the score for that player:
-            if depth == 0:
-                return self.score(game, active_player)
+
 
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_max_value(game, depth-1) for game in resulting_games]
