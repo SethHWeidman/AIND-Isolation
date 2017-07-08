@@ -275,8 +275,6 @@ class MinimaxPlayer(IsolationPlayer):
             # Get all the games that result from these moves
             resulting_games = [game.forecast_move(move) for move in available_moves]
 
-
-
             # For each resulting game, simulate all the moves and get the min value
             resulting_game_values = [_max_value(game, depth-1) for game in resulting_games]
 
@@ -347,8 +345,28 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
+        # Initialize `best_move` to be a random move:
+        legal_moves = game.get_legal_moves()
+
+        # Initialize the best move so that this function returns something
+        # in case the search fails due to timeout
+        if len(legal_moves) == 0:
+            return (-1, -1)
+
+        best_move = legal_moves[random.randint(0, len(legal_moves) - 1)]
+
+        try:
+            # The try/except block will automatically catch the exception
+            # raised when the timer is about to expire.
+            best_move = self.alphabeta(game, self.search_depth)
+
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
+
         # TODO: finish this function!
-        raise NotImplementedError
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -399,4 +417,76 @@ class AlphaBetaPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        active_player = game._active_player
+
+        def _max_value(game, depth, alpha, beta):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            if game.is_winner(self) or game.is_loser(self):
+                return game.utility(active_player)
+
+            # If depth is 0, just return the score for that cell:
+            if depth == 0:
+                return self.score(game, active_player)
+
+            # Get all moves available at current position
+            available_moves = game.get_legal_moves()
+
+            # Initialize the maximum value to be negative infinity
+            game_value = float("-inf")
+
+            for move in available_moves:
+                resulting_game = game.forecast_move(move)
+                game_value = _min_value(resulting_game, depth-1, alpha, beta)
+                if game_value >= beta:
+                    return game_value
+                alpha = max(alpha, game_value)
+
+            return game_value
+
+        def _min_value(game, depth, alpha, beta):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            if game.is_winner(self) or game.is_loser(self):
+                return game.utility(active_player)
+
+            # If depth is 0, just return the score for that player:
+            if depth == 0:
+                return self.score(game, active_player)
+
+            # Get all moves available at current position
+            available_moves = game.get_legal_moves()
+
+            # Initialize game value to be positive infinity
+            game_value = float("inf")            
+
+            for move in available_moves:
+                resulting_game = game.forecast_move(move)
+                game_value = _min_value(resulting_game, depth-1, alpha, beta)
+                if game_value <= alpha:
+                    return game_value
+                beta = min(beta, game_value)
+
+            return game_value
+
+        if game.is_loser(self):
+            best_move = (-1, -1)
+
+        # Get all moves available at current position
+        available_moves = game.get_legal_moves()
+
+        # Get all the games that result from these moves
+        resulting_games = [game.forecast_move(move) for move in available_moves]
+
+        # For each resulting game, simulate all the moves and get the min value
+        resulting_game_values = [_min_value(game, depth-1, alpha, beta) for game in resulting_games]
+
+        # Find the index of the best move
+        best_move_index = np.argmax(resulting_game_values)
+
+        # Get the best move
+        best_move = available_moves[best_move_index]
+
+        return best_move
