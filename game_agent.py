@@ -356,9 +356,10 @@ class AlphaBetaPlayer(IsolationPlayer):
         best_move = legal_moves[random.randint(0, len(legal_moves) - 1)]
 
         try:
-            # The try/except block will automatically catch the exception
-            # raised when the timer is about to expire.
-            best_move = self.alphabeta(game, self.search_depth)
+            depth = 1
+            while True:
+                best_move = self.alphabeta(game, depth)
+                depth += 1
 
         except SearchTimeout:
             pass  # Handle any actions required after timeout as needed
@@ -460,7 +461,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             available_moves = game.get_legal_moves()
 
             # Initialize game value to be positive infinity
-            game_value = float("inf")            
+            game_value = float("inf")
 
             for move in available_moves:
                 resulting_game = game.forecast_move(move)
