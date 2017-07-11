@@ -472,22 +472,28 @@ class AlphaBetaPlayer(IsolationPlayer):
 
             return game_value
 
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if game.is_winner(self) or game.is_loser(self):
+            return game.utility(active_player)
+
+        # If depth is 0, just return the score for that player:
+        if depth == 0:
+            return self.score(game, active_player)
+
         if game.is_loser(self):
             best_move = (-1, -1)
 
         # Get all moves available at current position
         available_moves = game.get_legal_moves()
 
-        # Get all the games that result from these moves
-        resulting_games = [game.forecast_move(move) for move in available_moves]
-
-        # For each resulting game, simulate all the moves and get the min value
-        resulting_game_values = [_min_value(game, depth-1, alpha, beta) for game in resulting_games]
-
-        # Find the index of the best move
-        best_move_index = np.argmax(resulting_game_values)
-
-        # Get the best move
-        best_move = available_moves[best_move_index]
-
+        best_score = float("-inf")
+        best_move = None
+        for move in available_moves:
+            resulting_game = game.forecast_move(move)
+            game_value = _min_value(resulting_game, depth, best_score, beta)
+            if game_value > best_score:
+                best_score = game_value
+                best_move = move
         return best_move
