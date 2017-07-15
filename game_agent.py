@@ -439,16 +439,14 @@ class AlphaBetaPlayer(IsolationPlayer):
         # Get all moves available at current position
         available_moves = game.get_legal_moves()
 
-        # Get all the games that result from these moves
-        resulting_games = [game.forecast_move(move) for move in available_moves]
-
-        # For each resulting game, simulate all the moves and get the min value
-        resulting_game_values = [_min_value(game, depth-1, alpha, beta) for game in resulting_games]
-
-        # Find the index of the best move
-        best_move_index = np.argmax(resulting_game_values)
-
-        # Get the best move
-        best_move = available_moves[best_move_index]
-
+        best_value = float("-inf")
+        best_move = (-1, -1)
+        for move in available_moves:
+            resulting_game = game.forecast_move(move)
+            game_value = _min_value(resulting_game, depth-1,
+                                    alpha, beta)
+            alpha = max(alpha, game_value)
+            if game_value > best_value:
+                best_value = game_value
+                best_move = move
         return best_move
